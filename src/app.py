@@ -3,7 +3,7 @@ import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from loguru import logger
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -19,6 +19,18 @@ class User(BaseModel):
         orm_mode = True
 
 
+def get_db():
+    conn = psycopg2.connect(
+        database="startml",
+        user="robot-startml-ro",
+        password="pheiph0hahj1Vaif",
+        host="postgres.lab.karpov.courses",
+        port=6432,
+        cursor_factory=RealDictCursor
+    )
+    return conn
+
+
 @app.get('/')
 def get_hello_world(a: int, b: int):
     return a + b
@@ -31,23 +43,16 @@ def get_sum_date(current_date: datetime.date, offset: int):
 
 
 @app.get('/user/{user_id}')
-def get_user_info(user_id: int):
-    conn = psycopg2.connect(
-        database="startml",
-        user="robot-startml-ro",
-        password="pheiph0hahj1Vaif",
-        host="postgres.lab.karpov.courses",
-        port=6432,
-        cursor_factory=RealDictCursor
-    )
-    cursor = conn.cursor()
-    sql_text = f'''
-    SELECT gender, age, city 
-        FROM "user"
-    WHERE id={user_id}
-    '''
-    cursor.execute(sql_text)
-    result = cursor.fetchone()
+def get_user_info(user_id: int, db=Depends(get_db)):
+    result = None
+    with db.cursor() as cursor:
+        sql_text = f'''
+        SELECT gender, age, city 
+            FROM "user"
+        WHERE id={user_id}
+        '''
+        cursor.execute(sql_text)
+        result = cursor.fetchone()
     logger.info(f'Get info: {result}')
     if result:
         return result
