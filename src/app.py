@@ -1,5 +1,7 @@
 import datetime
 
+import psycopg2
+from loguru import logger
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -25,6 +27,27 @@ def get_hello_world(a: int, b: int):
 def get_sum_date(current_date: datetime.date, offset: int):
     diff_days = datetime.timedelta(days=offset)
     return current_date + diff_days
+
+
+@app.get('/user/{user_id}')
+def get_user_info(user_id: int):
+    conn = psycopg2.connect(
+        database="startml",
+        user="robot-startml-ro",
+        password="pheiph0hahj1Vaif",
+        host="postgres.lab.karpov.courses",
+        port=6432
+    )
+    cursor = conn.cursor()
+    sql_text = f'''
+    SELECT gender, age, city 
+        FROM "user"
+    WHERE id={user_id}
+    '''
+    cursor.execute(sql_text)
+    result = cursor.fetchone()
+    logger.info(f'Get info: {result}')
+    return {'gender': result[0], 'age': result[1], 'city': result[2]}
 
 
 @app.post('/user/validate')
