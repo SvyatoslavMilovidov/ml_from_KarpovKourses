@@ -68,22 +68,22 @@ def get_user_info(user_id: int, db=Depends(get_db)):
     raise HTTPException(404, 'user not found')
 
 
-@app.post('/user/validate')
-def post_user_validate(user_info: User):
-    return f'Will add user: {user_info.name} {user_info.surname} with age {user_info.age}'
-
-
-@app.post('/post/{post_id}', response_model=PostResponse)
-def post_post_info(post_id: int, db=Depends(get_db)) -> PostResponse:
+@app.get('/post/{id}', response_model=PostResponse)
+def post_post_info(id: int, db=Depends(get_db)) -> PostResponse:
     result = None
     with db.cursor() as cursor:
         sql_request = f'''
         SELECT id, text, topic 
             FROM "post"
-        WHERE id={post_id}
+        WHERE id={id}
         '''
         cursor.execute(sql_request)
         result = cursor.fetchone()
     if result:
         return PostResponse(**result)
     raise HTTPException(404, 'post not found')
+
+
+@app.post('/user/validate')
+def post_user_validate(user_info: User):
+    return f'Will add user: {user_info.name} {user_info.surname} with age {user_info.age}'
