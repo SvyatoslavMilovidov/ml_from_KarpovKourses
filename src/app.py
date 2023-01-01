@@ -27,6 +27,6 @@ def get_sum_date(current_date: datetime.date, offset: int):
     return current_date + diff_days
 
 
-@app.post('/user/validate', response_model=User)
-def post_user_validate():
-    pass
+@app.post('/user/validate')
+def post_user_validate(user_info: User):
+    return f'Will add user: {user_info.name} {user_info.surname} with age {user_info.age}'
