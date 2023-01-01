@@ -3,7 +3,7 @@ import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from loguru import logger
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -49,7 +49,9 @@ def get_user_info(user_id: int):
     cursor.execute(sql_text)
     result = cursor.fetchone()
     logger.info(f'Get info: {result}')
-    return result
+    if result:
+        return result
+    raise HTTPException(404, 'user not found')
 
 
 @app.post('/user/validate')
