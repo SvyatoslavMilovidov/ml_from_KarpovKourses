@@ -84,6 +84,6 @@ def post_post_info(post_id: int, db=Depends(get_db)) -> PostResponse:
         '''
         cursor.execute(sql_request)
         result = cursor.fetchone()
-    # if result:
-    return PostResponse(**result)
-    # raise HTTPException(404, 'post not found')
+    if result:
+        return PostResponse(**result)
+    raise HTTPException(404, 'post not found')
