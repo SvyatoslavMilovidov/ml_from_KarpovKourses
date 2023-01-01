@@ -1,6 +1,7 @@
 import datetime
 
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from loguru import logger
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -36,7 +37,8 @@ def get_user_info(user_id: int):
         user="robot-startml-ro",
         password="pheiph0hahj1Vaif",
         host="postgres.lab.karpov.courses",
-        port=6432
+        port=6432,
+        cursor_factory=RealDictCursor
     )
     cursor = conn.cursor()
     sql_text = f'''
@@ -47,7 +49,7 @@ def get_user_info(user_id: int):
     cursor.execute(sql_text)
     result = cursor.fetchone()
     logger.info(f'Get info: {result}')
-    return {'gender': result[0], 'age': result[1], 'city': result[2]}
+    return result
 
 
 @app.post('/user/validate')
